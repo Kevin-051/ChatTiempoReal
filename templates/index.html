@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Discord Clone - Chat PA</title>
+    <style>
+        :root {
+            --bg-servers: #1e1f22;
+            --bg-channels: #2b2d31;
+            --bg-chat: #313338;
+            --bg-input: #383a40;
+            --discord-blue: #5865f2;
+            --text-main: #f2f3f5;
+            --text-muted: #949ba4;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'GG Sans', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            display: flex;
+            height: 100vh;
+            background-color: var(--bg-chat);
+            color: var(--text-main);
+            overflow: hidden;
+        }
+
+        .servers-sidebar {
+            width: 72px;
+            background-color: var(--bg-servers);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding-top: 12px;
+            gap: 8px;
+        }
+
+        .server-icon {
+            width: 48px;
+            height: 48px;
+            background-color: #313338;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: var(--text-main);
+            cursor: pointer;
+            transition: all 0.2s ease-in-out;
+        }
+
+        .server-icon.active, .server-icon:hover {
+            border-radius: 16px;
+            background-color: var(--discord-blue);
+        }
+
+        .channels-sidebar {
+            width: 240px;
+            background-color: var(--bg-channels);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .server-header {
+            height: 48px;
+            border-bottom: 1px solid #1f2023;
+            display: flex;
+            align-items: center;
+            padding: 0 16px;
+            font-weight: bold;
+            font-size: 0.95rem;
+        }
+
+        .category-title {
+            padding: 16px 8px 4px 8px;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            font-weight: bold;
+            letter-spacing: 0.5px;
+        }
+
+        .channel-item {
+            margin: 2px 8px;
+            padding: 6px 8px;
+            border-radius: 4px;
+            color: var(--text-muted);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            font-size: 0.95rem;
+        }
+
+        .channel-item.active, .channel-item:hover {
+            background-color: #35373c;
+            color: var(--text-main);
+        }
+
+        .channel-item::before {
+            content: "# ";
+            font-size: 1.2rem;
+            color: #80848e;
+            margin-right: 6px;
+        }
+
+        .user-login-panel {
+            margin-top: auto;
+            background-color: #232428;
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .chat-area {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            background-color: var(--bg-chat);
+        }
+
+        .chat-header {
+            height: 48px;
+            border-bottom: 1px solid #26272b;
+            display: flex;
+            align-items: center;
+            padding: 0 16px;
+            font-weight: bold;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.2);
+        }
+        
+        .chat-header::before {
+            content: "# ";
+            color: #80848e;
+            font-size: 1.3rem;
+            margin-right: 4px;
+        }
+
+        #chat {
+            flex-grow: 1;
+            padding: 20px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .message-wrapper {
+            display: flex;
+            gap: 16px;
+        }
+
+        .avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: #5865f2;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 0.9rem;
+            flex-shrink: 0;
+        }
+
+        .message-content {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .message-user {
+            font-weight: 500;
+            color: var(--text-main);
+            font-size: 0.95rem;
+        }
+
+        .message-text {
+            color: #dbdee1;
+            font-size: 0.95rem;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+
+        .chat-input-area {
+            padding: 0 20px 24px 20px;
+        }
+
+        .input-wrapper {
+            background-color: var(--bg-input);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            padding: 10px 16px;
+        }
+
+        .input-wrapper input {
+            flex-grow: 1;
+            background: transparent;
+            border: none;
+            outline: none;
+            color: var(--text-main);
+            font-size: 0.95rem;
+        }
+
+        .input-wrapper input::placeholder {
+            color: #6d737d;
+        }
+
+        .discord-btn {
+            background-color: var(--discord-blue);
+            color: white;
+            border: none;
+            padding: 6px 14px;
+            border-radius: 3px;
+            font-weight: 500;
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: background 0.2s;
+        }
+
+        .discord-btn:hover {
+            background-color: #4752c4;
+        }
+
+        .discord-btn:disabled {
+            background-color: #3c4270;
+            color: #949ba4;
+            cursor: not-allowed;
+        }
+
+        #chat::-webkit-scrollbar { width: 8px; }
+        #chat::-webkit-scrollbar-track { background: transparent; }
+        #chat::-webkit-scrollbar-thumb { background: #1a1b1e; border-radius: 4px; }
+    </style>
+</head>
+<body>
+
+    <div class="servers-sidebar">
+        <div class="server-icon active">PA</div>
+        <div class="server-icon" style="background-color: #232428; color: #23a55a;">+</div>
+    </div>
+
+    <div class="channels-sidebar">
+        <div class="server-header">Proyecto PA</div>
+        
+        <div class="category-title">Canales de texto</div>
+        <div class="channel-item active">chat-principal</div>
+        
+        <div class="user-login-panel">
+            <input type="text" id="nombre" placeholder="Introduce tu Username" style="background: #1e1f22; border: 1px solid #383a40; padding: 6px; color: white; border-radius: 4px; outline: none; font-size: 0.85rem;">
+            <button id="idIngresar" class="discord-btn" onclick="guardarNombre()">Iniciar Sesión</button>
+        </div>
+    </div>
+
+    <div class="chat-area">
+        <div class="chat-header">chat-principal</div>
+        
+        <div id="chat">
+            <div class="message-wrapper">
+                <div class="avatar" style="background-color: #23a55a;">SYS</div>
+                <div class="message-content">
+                    <span class="message-user" style="color: #23a55a;">Sistema</span>
+                    <span class="message-text">Bienvenido al servidor. Por favor, inicia sesión a la izquierda para enviar mensajes.</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="chat-input-area">
+            <div class="input-wrapper">
+                <input type="text" id="mensaje" placeholder="Enviar mensaje a #chat-principal" disabled>
+                <button id="idEnviar" class="discord-btn" onclick="enviarMensaje()" disabled>Enviar</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ============================================================
+        // CÓDIGO CORREGIDO - CHAT LOCAL SIN SERVIDOR
+        // ============================================================
+        var nombreUsuario = "";
+
+        function guardarNombre() {
+            var nombreInput = document.getElementById("nombre");
+            if (nombreInput.value.trim() == "") {
+                alert("Escribe un nombre de usuario válido.");
+                return;
+            }
+            nombreUsuario = nombreInput.value;
+
+            // Bloquear inputs de login
+            nombreInput.disabled = true;
+            document.getElementById("idIngresar").disabled = true;
+
+            // Habilitar inputs de chat
+            document.getElementById("mensaje").disabled = false;
+            document.getElementById("idEnviar").disabled = false;
+            document.getElementById("mensaje").placeholder = "Enviar mensaje como " + nombreUsuario;
+
+            // Notificar localmente el login
+            renderMensaje("Sistema", "Te has conectado como **" + nombreUsuario + "**", "SYS", "#23a55a");
+        }
+
+        function enviarMensaje() {
+            var mensajeInput = document.getElementById("mensaje");
+            var mensajeEnviar = mensajeInput.value;
+
+            if (mensajeEnviar.trim() != "" && nombreUsuario != "") {
+                // Mostrar el mensaje localmente con el nombre del usuario
+                renderMensaje(nombreUsuario, mensajeEnviar, nombreUsuario.substring(0, 2).toUpperCase());
+                mensajeInput.value = "";
+            }
+        }
+
+        function renderMensaje(usuario, texto, iniciales, avatarColor = "#5865f2") {
+            var chat = document.getElementById("chat");
+
+            var wrapper = document.createElement("div");
+            wrapper.className = "message-wrapper";
+
+            wrapper.innerHTML = `
+                <div class="avatar" style="background-color: ${avatarColor}">${iniciales}</div>
+                <div class="message-content">
+                    <span class="message-user">${usuario}</span>
+                    <span class="message-text">${texto}</span>
+                </div>
+            `;
+
+            chat.appendChild(wrapper);
+            chat.scrollTop = chat.scrollHeight;
+        }
+
+        // Permitir enviar mensaje con la tecla "Enter"
+        document.getElementById("mensaje").addEventListener("keypress", function(e) {
+            if (e.key === "Enter" && !document.getElementById("mensaje").disabled) {
+                enviarMensaje();
+            }
+        });
+    </script>
+
+</body>
+</html>
