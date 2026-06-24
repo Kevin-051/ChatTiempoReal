@@ -30,7 +30,6 @@
             overflow: hidden;
         }
 
-        /* 1. BARRA DE SERVIDORES */
         .servers-sidebar {
             width: 72px;
             background-color: var(--bg-servers);
@@ -60,7 +59,6 @@
             background-color: var(--discord-blue);
         }
 
-        /* 2. BARRA DE CANALES */
         .channels-sidebar {
             width: 240px;
             background-color: var(--bg-channels);
@@ -110,7 +108,6 @@
             margin-right: 6px;
         }
 
-        /* Login Seccion dentro de canales */
         .user-login-panel {
             margin-top: auto;
             background-color: #232428;
@@ -120,7 +117,6 @@
             gap: 8px;
         }
 
-        /* 3. AREA DE CHAT */
         .chat-area {
             flex-grow: 1;
             display: flex;
@@ -154,7 +150,6 @@
             gap: 16px;
         }
 
-        /* Mensajes estilo Discord */
         .message-wrapper {
             display: flex;
             gap: 16px;
@@ -192,7 +187,6 @@
             word-break: break-word;
         }
 
-        /* Formulario de envío */
         .chat-input-area {
             padding: 0 20px 24px 20px;
         }
@@ -240,7 +234,6 @@
             cursor: not-allowed;
         }
 
-        /* Scrollbar minimalista */
         #chat::-webkit-scrollbar { width: 8px; }
         #chat::-webkit-scrollbar-track { background: transparent; }
         #chat::-webkit-scrollbar-thumb { background: #1a1b1e; border-radius: 4px; }
@@ -286,59 +279,47 @@
         </div>
     </div>
 
-    <script src="/socket.io/socket.io.js"></script>
     <script>
-        var socket = io();
+        // ============================================================
+        // CÓDIGO CORREGIDO - CHAT LOCAL SIN SERVIDOR
+        // ============================================================
         var nombreUsuario = "";
 
-        function guardarNombre(){
+        function guardarNombre() {
             var nombreInput = document.getElementById("nombre");
-            if(nombreInput.value.trim() == ""){
+            if (nombreInput.value.trim() == "") {
                 alert("Escribe un nombre de usuario válido.");
                 return;
-            }          
+            }
             nombreUsuario = nombreInput.value;
-            
+
             // Bloquear inputs de login
             nombreInput.disabled = true;
             document.getElementById("idIngresar").disabled = true;
-            
+
             // Habilitar inputs de chat
             document.getElementById("mensaje").disabled = false;
             document.getElementById("idEnviar").disabled = false;
-            document.getElementById("mensaje").placeholder = `Enviar mensaje como ${nombreUsuario}`;
+            document.getElementById("mensaje").placeholder = "Enviar mensaje como " + nombreUsuario;
 
             // Notificar localmente el login
-            renderMensaje("Sistema", `Te has conectado como **${nombreUsuario}**`, "SYS", "#23a55a");
+            renderMensaje("Sistema", "Te has conectado como **" + nombreUsuario + "**", "SYS", "#23a55a");
         }
 
-        function enviarMensaje(){
+        function enviarMensaje() {
             var mensajeInput = document.getElementById("mensaje");
             var mensajeEnviar = mensajeInput.value;
-            
-            if(mensajeEnviar.trim() != "" && nombreUsuario != ""){
-                // Enviamos el mensaje estructurado con el nombre
-                socket.send(nombreUsuario + ": " + mensajeEnviar);
+
+            if (mensajeEnviar.trim() != "" && nombreUsuario != "") {
+                // Mostrar el mensaje localmente con el nombre del usuario
+                renderMensaje(nombreUsuario, mensajeEnviar, nombreUsuario.substring(0, 2).toUpperCase());
                 mensajeInput.value = "";
             }
         }
 
-        socket.on("message", function(data){
-            var puntos = data.indexOf(":");
-            if (puntos !== -1) {
-                var user = data.substring(0, puntos).trim();
-                var msg = data.substring(puntos + 1).trim();
-                var iniciales = user.substring(0, 2).toUpperCase();
-                renderMensaje(user, msg, iniciales);
-            } else {
-                // Por si el servidor devuelve el mensaje limpio sin formato "usuario:"
-                renderMensaje("Usuario", data, "U");
-            }
-        });
-
         function renderMensaje(usuario, texto, iniciales, avatarColor = "#5865f2") {
             var chat = document.getElementById("chat");
-            
+
             var wrapper = document.createElement("div");
             wrapper.className = "message-wrapper";
 
@@ -351,14 +332,16 @@
             `;
 
             chat.appendChild(wrapper);
-            chat.scrollTop = chat.scrollHeight; 
+            chat.scrollTop = chat.scrollHeight;
         }
 
+        // Permitir enviar mensaje con la tecla "Enter"
         document.getElementById("mensaje").addEventListener("keypress", function(e) {
             if (e.key === "Enter" && !document.getElementById("mensaje").disabled) {
                 enviarMensaje();
             }
         });
     </script>
+
 </body>
 </html>
